@@ -1,0 +1,3 @@
+[submodule "sparkai"]
+	path = sparkai
+	url = https://github.com/sparkai-corp/sparkai.git

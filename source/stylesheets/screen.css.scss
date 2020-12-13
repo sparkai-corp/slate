@@ -24,6 +24,9 @@ under the License.
 // GENERAL STUFF
 ////////////////////////////////////////////////////////////////////////////////
 
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap");
+
+
 html, body {
   color: $main-text;
   padding: 0;
@@ -76,6 +79,7 @@ html, body {
     display: block;
     max-width: 100%;
     margin-bottom: $logo-margin;
+    margin: 15px;
   }
 
   &>.search {
