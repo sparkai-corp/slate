@@ -151,29 +151,35 @@ Annotations take three parameters:
 * A type (`polygon` or `bounding_box`)
 
 # Python example code
-```python
 
+```python
 # Python3 example
 
+import os
+import requests
+import json
+import sys
+import http.server
+
 base_url = 'https://sandbox.spark.ai'
-image_path = '/tmp/your_image.png'
+image_path = '/tmp/image.png'
 # Example auth token. Replace with a provided token
-auth_token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfdXNlcl9pZCI6IjMxODk0NjBlLTNiN2ItNDkyNi04NzUwLTE3NmZlMDhjN2Y1MSIsImlhdCI6MTYwMzM5MzI5MiwiZXhwIjoxNjM0OTI5MjkyLCJpc3MiOiJzcGFyay5haSIsInN1YiI6IjIuMCJ9.efhoXMUwmc2dYOIoKtFfnUvJBfT77ztG5N2dXfBvhs691hsD9n5BXQUb7frFrr4-zox_K4veUzVu7njK1WwhHd3NdjVaKUSiyXHriKsLsaoNQBKCbTbGyzZI2kJHDFHLqIeZo6uw7oI0HjHVn8NN5WQbFjfPlwTZiT1kaZ1qY84Zqhnqqi9wpJYTBd1scUNrfz79Bw6mLIArrceQd6atTAcqIjn2CkbgiFeX4f7vHOglNFZ1VMOGDHFxmxxlRLbLhcf32oneNqvZH1wygCNiHU4DtHsI-Fb-GQSvm2HGHJ7Smuba5BiUdC3Z42-_ytPEizVwbz-QvQHrU017kklmmZLt8eG52TT9J1TV3Gb5j81nrIkBwCZ6pjPgIlis1RHmqw6i7w1uL0-9mG3hehnKrlQJ_u-kwqRCktPtbkGYuQWMwScHjNVRnlc6647qYU8HO8j0KXZY8_YxDf14q517Z588Sy_o_gdRVfeDhS-X_piak32QPo89tYA7IGtCG51sB2ielhLe5ObcbRULfnVp2lbRmD46GFXfBSfnKVBXrpOl1iewFtOd85YUmIw1yxqZqRVjH_AtPFo4y31es2dU0zyio_3OKMUQH3VBh4XeJ3z9r6hen-QbPBOm05IeW3VXrfUhgoFuO0BwQ1FycoErtY717AGQGHnCVD9Yx0jaIF4'
-local_server_port = 3388
-# Example webhook URL. Replace or omit.
-webhook_url = 'https://6a65d4bcd0a6.ngrok.io'
+auth_token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfdXNlcl9pZCI6IjY1Y2ExM2U0LTM3OTEtNDFlMC05ZmE0LTY5NTFmYzE5MDdlNyIsImlhdCI6MTYwNzg5MTIyNCwiZXhwIjoxNjM5NDI3MjI0LCJpc3MiOiJzcGFyay5haSIsInN1YiI6IjIuMCJ9.j5kKufsSXQWGfZcVL-FD7G1IVy-9dmEAbnbCR8YqOVcFXawcPxf_TOm-CzN-OSJE3Z9A6-BA3m3VOJl_FWyphcQmGL8nINoBszoMJCnwaHZahe6DIR_mx2SsRaQRrnDPPZ3vYUmKaDAUVZU3Woo2yvCF5XWQBQnHNLCW4RFVhCq-bWJptYz74ylWJPKSk-mith3qQF0L70hoTSvsZjz6rJfoYKrSdU1miG-3cdYqcFJZbFedSJ750XShLa3mNxPtbWZ608OHlroSuI0ZGTH_iqi3lRWW3vyO_7c1VxY-XTVeuVptMTWLgwI69OI_7Ww5xcdPd5JyR0KDCIow07Yh9vtod0PqCd5VfQYj6HNb4xq0boOfeBS4DjYbMVLNOsGUdNZVOysrKozJcoOYg-Xxqub-upgHj3Gbw5Tiw_z_I9jQ62-2ptGNh9GTeAjCQUzSYrwW1nY9Ihi104osIr6zVQyrQ6hgTHcmg51iFIt3rN11bHdNCdTo4SIyVGN5VRPF-9HEqZAojAqooSljBBWA9nNkM8-4zBNqjKQEpp-1-uAbe8Ft80XJ_bcP0pahJHqJpav8F-dA-9an6PG-75ZFuNWZKNdu2ms0ZzbQbTcmw4ujInjuvDcaYsZ3pL3zfI0tDIF2YUiQuZUa93D8G8xyecbF8PBogLYWJbMfZIg6-jQ'
 instructions = 'Confirm there are no obstructions in the path of this robot'
+
+# Example webhook URL. Replace or omit.
+webhook_local_server_port = 3388
+webhook_url = 'http://77bb049f3629.ngrok.io'
 
 headers = {
  'Authorization': 'Bearer ' + auth_token
 }
 
 # Upload an image to the SparkAI Image Server.
-# This isn't necessary if the image is already hosted
 image_resource_url = '/v1/image'
 binary_image = open(image_path, 'rb')
 image_name = os.path.basename(image_path)
-files= { 'image_file': (image_name, binary_image, 'multipart/form-data',{'Expires': '0'}) }
+files= { 'image_file': (image_name, binary_image, 'multipart/form-data') }
 r = requests.post(base_url + image_resource_url, headers=headers, files=files, data={})
 
 if r.status_code == 200:
@@ -186,10 +192,15 @@ else:
 
 # Create a new engagement request
 engagement_data = {
-    'content_location': [image_url],
+    'content_location': image_url,
     'webhook_url': webhook_url,
     'instructions': instructions
 }
+# An alternate option
+# engagement_data = {
+#     'content_location': image_url,
+#     'program_name': 'your_program',
+# }
 
 engagement_resource_url = '/v1/engagement'
 r = requests.post(base_url + engagement_resource_url, headers=headers, json=engagement_data)
@@ -200,22 +211,27 @@ else:
     print(resp['statusCode'], resp['message'])
     sys.exit()
 
+# Check status of the engagement
+r = requests.get(base_url + engagement_resource_url + '/' + resp['token'], headers=headers)
+print('Checking engagement status')
+print(json.dumps(json.loads(r.content), indent=2))
+
 # Setup a simple HTTP server to receive webhook URL.
-# This isnt necessary, but helps demonstrate using webhooks.
-# This local server can be tunnelled to the internet by using a tool like ngrok (www.ngrok.io)
+# This isnt necessary, but helps demonstrate the use of webhooks.
+# This local server can be tunnelled to the internet by using a tool such as ngrok (www.ngrok.io)
 class SimpleHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length)
         self.send_response(200)
         self.end_headers()
-        print('Receveid response from SparkAI service')
+        print('Received response from SparkAI service')
         response = json.loads(body)
         print(json.dumps(response, indent=2))
         sys.exit()
 
 # Create a local server that accepts the resolutions from SparkAI as a webhook
-httpd = http.server.HTTPServer(('', local_server_port), SimpleHTTPRequestHandler)
+httpd = http.server.HTTPServer(('', webhook_local_server_port), SimpleHTTPRequestHandler)
 httpd.serve_forever()
 ```
 
@@ -548,9 +564,9 @@ To perform this operation, you must be authenticated by means of one of the foll
 bearerAuth
 </aside>
 
-## Get status of a SparkAI job by token
+## Get status of a SparkAI engagement by token
 
-<a id="opIdget-job-token"></a>
+<a id="opIdget-engagement-token"></a>
 
 > Code samples
 
@@ -561,7 +577,7 @@ headers = {
   'Authorization': 'Bearer {access-token}'
 }
 
-r = requests.get('https://app.spark.ai/v1/job/{token}', headers = headers)
+r = requests.get('https://app.spark.ai/v1/engagement/{token}', headers = headers)
 
 print(r.json())
 
@@ -574,7 +590,7 @@ const headers = {
   'Authorization':'Bearer {access-token}'
 };
 
-fetch('https://app.spark.ai/v1/job/{token}',
+fetch('https://app.spark.ai/v1/engagement/{token}',
 {
   method: 'GET',
 
@@ -590,24 +606,24 @@ fetch('https://app.spark.ai/v1/job/{token}',
 
 ```shell
 # You can also use wget
-curl -X GET https://app.spark.ai/v1/job/{token} \
+curl -X GET https://app.spark.ai/v1/engagement/{token} \
   -H 'Accept: application/json' \
   -H 'Authorization: Bearer {access-token}'
 
 ```
 
-`GET /v1/job/{token}`
+`GET /v1/engagement/{token}`
 
-This API call can be used to poll for the status of a SparkAI job by its unique token
+This API call can be used to poll for the status of a SparkAI engagement by its unique token
 
-<h3 id="get-status-of-a-sparkai-job-by-token-parameters">Parameters</h3>
+<h3 id="get-status-of-a-sparkai-engagement-by-token-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |limit|query|number|false|Limit the number of responses, up to 50|
 |cursor|query|number|false|Obtain results beginning at the cursor|
 |state|query|string|false|State of engagement|
-|token|path|string(uuid)|false|Unique job token|
+|token|path|string(uuid)|false|Unique engagement token|
 
 #### Enumerated Values
 
@@ -650,13 +666,13 @@ This API call can be used to poll for the status of a SparkAI job by its unique 
 ]
 ```
 
-<h3 id="get-status-of-a-sparkai-job-by-token-responses">Responses</h3>
+<h3 id="get-status-of-a-sparkai-engagement-by-token-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|OK|Inline|
 
-<h3 id="get-status-of-a-sparkai-job-by-token-responseschema">Response Schema</h3>
+<h3 id="get-status-of-a-sparkai-engagement-by-token-responseschema">Response Schema</h3>
 
 Status Code **200**
 
