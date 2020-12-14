@@ -28,6 +28,14 @@ headingLevel: 2
 
 We know how hard it is to perfect AI – every model struggles in some way, and that gap dictates the pace of progress. SparkAI makes it easy to instantly deploy a human-in-the-loop solution to your hardest AI challenges. We specialize in delivering high-integrity, real-time resolution to longtail AI exceptions in production, empowering you to launch & scale revolutionary products faster than ever before.
 
+Common ways engineering and product teams leverage SparkAI include:
+
+* Resolving low-confidence decisions and edge cases in production
+* Launching new products & features with in-development AI models 
+* Rapidly generating ground truth data
+* Real-time quality assurance of model outputs
+* Bootstrapping new models for evaluation with customers
+
 # Overview
 
 ## SparkAI service
