@@ -1,5 +1,5 @@
 ---
-title: SparkAI vundefined
+title: SparkAI documentation
 language_tabs:
   - python: Python
   - javascript: Javascript
@@ -55,6 +55,8 @@ SparkAI provides two environments, one for integration testing (*sandbox*) and t
 ### Sandbox server
 
 The sandbox server can be used to test the API interface. This server acts exactly like the production server, but is intended for integration and testing before entering production.
+
+When new engagement requests are made to the Sandbox server, a resolution will be automatically generated. The results from teh resolution are for testing only.
 
 Sandbox server URL: `https://sandbox.spark.ai`
 
@@ -134,15 +136,19 @@ Please reach out to <support@spark.ai> for assistance with the authorization tok
 
 # Metadata
 
-Metadata about the request can be included in the request as a set of JSON key-value pairs. 
+Metadata about the request may optionally be included in the request to provide additional context. Metadata should take the form of a set of JSON key-value pairs.
 
 # Annotations
 
-Some `resolutions` may contain a set of `annotations`. When `annotations` are provided in the request, the SparkAI service will use them as additional context for providing the best `resolution`. Annotations may be corrected or adjusted by SparkAI, and if so will be provided in the response.
+New `engagement` requests may include a set of annotations. The SparkAI service will use these annotations to assist in providing a `resolution`. Corrections may also be provided. Similarly, resolutions to engagement requests may also contain annotations.
 
-Annotations for images take the form of a set of vertices on a bounding box or polygons, with an included label.
+Note that annotations vertices are in relative coordinates to the image size, and must be between [0, 1)
 
-Annotations may also be provided in the response, following a similar format as the request. 
+Annotations take three parameters:
+
+* A set of vertices
+* A label
+* A type (`polygon` or `bounding_box`)
 
 # Python example code
 ```python
@@ -258,7 +264,7 @@ const inputBody = '{
     "key2": "string"
   },
   "priors": {
-    "label_options": [
+    "label_set": [
       "string"
     ],
     "annotations": [
@@ -267,8 +273,8 @@ const inputBody = '{
         "type": "bounding_box",
         "vertices": [
           {
-            "x": "string",
-            "y": "string"
+            "x": 0,
+            "y": 0
           }
         ]
       }
@@ -321,7 +327,7 @@ When authorized, this API call will initate a new engagement request.
     "key2": "string"
   },
   "priors": {
-    "label_options": [
+    "label_set": [
       "string"
     ],
     "annotations": [
@@ -330,8 +336,8 @@ When authorized, this API call will initate a new engagement request.
         "type": "bounding_box",
         "vertices": [
           {
-            "x": "string",
-            "y": "string"
+            "x": 0,
+            "y": 0
           }
         ]
       }
@@ -352,13 +358,13 @@ When authorized, this API call will initate a new engagement request.
 |» key1|body|string|false|none|
 |» key2|body|string|false|none|
 |priors|body|object|false|none|
-|» label_options|body|[string]|false|An optional array of labels to choose from|
+|» label_set|body|[string]|false|An optional array of labels to choose from in corrections|
 |» annotations|body|[object]|false|Annotations provided for the service on this content. Annotations are relative to the dimensions of the content and between [0, 1)|
 |»» label|body|string|false|This annotation's label|
 |»» type|body|string|false|Annotation type|
 |»» vertices|body|[object]|false|Vertices of the annotation. For bounding_box, the first vertex should be the top-left corner of the box, moving clockwise|
-|»»» x|body|string|false|x coordinate, between [0, 1)|
-|»»» y|body|string|false|y coordinate, between [0, 1)|
+|»»» x|body|number|false|x coordinate, between [0, 1)|
+|»»» y|body|number|false|y coordinate, between [0, 1)|
 
 #### Enumerated Values
 
@@ -453,6 +459,7 @@ This API call can be used to poll for the status of any ongoing or completed Spa
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |limit|query|number|false|Limit the number of responses, up to 50|
+|count|query|boolean|false|Return the total count of the query, instead of results|
 |cursor|query|number|false|Obtain results beginning at the cursor|
 |state|query|string|false|State of engagement|
 
@@ -541,8 +548,6 @@ To perform this operation, you must be authenticated by means of one of the foll
 bearerAuth
 </aside>
 
-<h1 id="--v1-job">/v1/job</h1>
-
 ## Get status of a SparkAI job by token
 
 <a id="opIdget-job-token"></a>
@@ -619,20 +624,26 @@ This API call can be used to poll for the status of a SparkAI job by its unique 
 ```json
 [
   {
-    "job_name": "string",
-    "token": "b5507016-7da2-4777-a161-1e8042a6a377",
-    "state": "open",
     "date_created": "2019-08-24T14:15:22Z",
     "date_closed": "2019-08-24T14:15:22Z",
+    "token": "b5507016-7da2-4777-a161-1e8042a6a377",
+    "instructions": "string",
+    "webhook_url": "http://example.com",
     "program_name": "string",
-    "engagements": [
+    "image_location": "http://example.com",
+    "state": "open",
+    "response": "string",
+    "annotations": [
       {
-        "image_location": "http://example.com",
-        "flags": [
-          "interesting"
-        ],
-        "state": "open",
-        "response": "string"
+        "original_annotation": {},
+        "label": "string",
+        "type": "bounding_box",
+        "vertices": [
+          {
+            "x": 0,
+            "y": 0
+          }
+        ]
       }
     ]
   }
@@ -651,17 +662,22 @@ Status Code **200**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» job_name|string|false|none|none|
-|» token|string(uuid)|false|none|none|
-|» state|string|false|none|none|
 |» date_created|string(date-time)|false|none|none|
 |» date_closed|string(date-time)|false|none|none|
-|» program_name|string(string)|false|none|none|
-|» engagements|[object]|false|none|none|
-|»» image_location|string(uri)|false|none|none|
-|»» flags|[string]|false|none|none|
-|»» state|string|false|none|none|
-|»» response|string|false|none|none|
+|» token|string(uuid)|false|none|none|
+|» instructions|string|false|none|Instructions, if provided|
+|» webhook_url|string(uri)|false|none|The webhook URL, if provided|
+|» program_name|string(string)|false|none|The program name, if provided|
+|» image_location|string(uri)|false|none|none|
+|» state|string|false|none|none|
+|» response|string|false|none|none|
+|» annotations|[object]|false|none|New or modified annotations associated with the response|
+|»» original_annotation|object|false|none|Correction to the annotation, if provided. Follows the format of the annotations below|
+|»» label|string|false|none|This annotation's label|
+|»» type|string|false|none|Annotation type|
+|»» vertices|[object]|false|none|Vertices of the annotation. For bounding_box, the first vertex should be the top-left corner of the box, moving clockwise|
+|»»» x|number|false|none|x coordinate, between [0, 1)|
+|»»» y|number|false|none|y coordinate, between [0, 1)|
 
 #### Enumerated Values
 
@@ -670,9 +686,8 @@ Status Code **200**
 |state|open|
 |state|assigned|
 |state|closed|
-|state|open|
-|state|assigned|
-|state|closed|
+|type|bounding_box|
+|type|polygon|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
