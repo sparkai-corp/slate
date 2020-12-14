@@ -46,7 +46,7 @@ SparkAI provides two environments, one for integration testing (**sandbox**) and
 
 The sandbox server can be used to test the API interface. This server acts exactly like the production server, but is intended for integration and testing before entering production.
 
-When new engagement requests are made to the Sandbox server, a resolution will be automatically generated. The results from teh resolution are for testing only.
+When new engagement requests are made to the Sandbox server, a resolution will be automatically generated. The results from ths resolution are for testing only.
 
 Sandbox server URL: `https://sandbox.spark.ai`
 
@@ -89,7 +89,7 @@ Reponse time is measured from the time a new `engagement` request reaches the Sp
 
 Two options exist for obtaining `resolutions` from the SparkAI service.
 
-* Create the initial `engafgement` request with a webhook URL. The SparkAI service will attempt to `POST` results to the provided URL on any change of `engagement` status.
+* Create the initial `engagement` request with a webhook URL. The SparkAI service will attempt to `POST` results to the provided URL on any change of `engagement` status.
 * A user can **poll** the `engagement` API endpoint for status and `resolution`. This option is always available, even if a webhook URL option was provided.
 
 The webhook URL should be:
@@ -532,10 +532,10 @@ Status Code **200**
 |» state|string|false|none|none|
 |» response|string|false|none|none|
 |» annotations|[object]|false|none|New or modified annotations associated with the response|
-|»» original_annotation|object|false|none|Correction to the annotation, if provided. Follows the format of the annotations below|
+|»» original_annotation|object|false|none|Correction to any provided annotations, and follows the format below|
 |»» label|string|false|none|This annotation's label|
 |»» type|string|false|none|Annotation type|
-|»» vertices|[object]|false|none|Vertices of the annotation. For bounding_box, the first vertex should be the top-left corner of the box, moving clockwise|
+|»» vertices|[object]|false|none|Vertices of the annotation. For bounding_box, the first vertex should be the top-left corner of the box, moving clockwise.|
 |»»» x|number|false|none|x coordinate, between [0, 1)|
 |»»» y|number|false|none|y coordinate, between [0, 1)|
 
@@ -604,7 +604,7 @@ curl -X GET https://app.spark.ai/v1/engagement/{token} \
 
 `GET /v1/engagement/{token}`
 
-This API call can be used to poll for the status of a SparkAI engagement by its unique token
+This API call can be used to poll for the status of a SparkAI engagement by its unique token.
 
 <h3 id="get-status-of-a-sparkai-engagement-by-token-parameters">Parameters</h3>
 
@@ -758,7 +758,7 @@ curl -X POST https://app.spark.ai/v1/image \
 
 `POST /v1/image`
 
-Uploads an image to SparkAI, returning a cryptographically signed URL
+Uploads an image to SparkAI, returning a cryptographically signed URL.
 
 > Body parameter
 
