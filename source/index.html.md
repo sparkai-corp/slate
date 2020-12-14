@@ -28,29 +28,19 @@ headingLevel: 2
 
 We know how hard it is to perfect AI – every model struggles in some way, and that gap dictates the pace of progress. SparkAI makes it easy to instantly deploy a human-in-the-loop solution to your hardest AI challenges. We specialize in delivering high-integrity, real-time resolution to longtail AI exceptions in production, empowering you to launch & scale revolutionary products faster than ever before.
 
-Common ways engineering and product teams leverage SparkAI include:
-
-* Resolving low-confidence decisions and edge cases in production
-* Launching new products & features with in-development AI models
-* Rapidly generating ground truth data
-* Real-time quality assurance of model outputs
-* Bootstrapping new models for evaluation with customers
-
-When you ping the SparkAI API, you tap into an expansive apparatus of tightly coupled technology and human operations that invisibly scale up with your needs, directed toward your most important goals.
-
 # Overview
 
 ## SparkAI service
 
-Interacting with the SparkAI service occurs through a web-based HTTP API. New `engagement` requests are made via a REST-based API, and can be polled for status updates. If a requestor requires immediate notification on any status change, the SparkAI service can push a `resolution` via a provided `web-hook` URL.
+Interacting with the SparkAI service occurs through a web-based HTTP API. New `engagement` requests are made via a REST-based API, and can be polled for status updates. If a requestor requires immediate notification on any status change, the SparkAI service can push a `resolution` via a provided `webhook URL`.
 
-New `engagement` requests can be made with an associated associated `program`, which contains metadata and context about the `engagement`. If a `program` is not provided with a request, SparkAI will still make a best effort at providing a resolution with provided instructions.
+New `engagement` requests can be made with an associated `program`, which contains metadata and context about the `engagement`. If a `program` is not provided with a request, SparkAI will still make a best effort at creating a resolution. These requests should be made with clear instructions.
 
-All calls using the HTTP API follow the form of `https://app.spark.ai/v1/<path>`.
+All HTTP API calls follow the form of `https://app.spark.ai/v1/<path>`.
 
 ## Enviroments
 
-SparkAI provides two environments, one for integration testing (*sandbox*) and the second for billable API calls (*production*).
+SparkAI provides two environments, one for integration testing (**sandbox**) and the second for billable API calls (**production**).
 
 ### Sandbox server
 
@@ -87,7 +77,7 @@ Examples of status codes returned are below:
 The unit of work for the SparkAI service is an `engagement`. Any `engagement` request will be routed through the SparkAI service.
 
 ### Program
-A `program` is the meta-data asssociated with engagment requests made of the SparkAI service, such as clear instructions, categories, or reference material.
+A `program` is data asssociated with engagment requests made of the SparkAI service, such as clear instructions, categories, or reference material. A new `program` is created in conjunction with the SparkAI team.
 
 ### Resolution
 A `resolution` is the response to an `engagement` request.
@@ -99,8 +89,8 @@ Reponse time is measured from the time a new `engagement` request reaches the Sp
 
 Two options exist for obtaining `resolutions` from the SparkAI service.
 
-* A user can poll the `engagement` API endpoint for status and `resolution`. This option is always available, even if the webhook URL option is used.
 * Create the initial `engafgement` request with a webhook URL. The SparkAI service will attempt to `POST` results to the provided URL on any change of `engagement` status.
+* A user can **poll** the `engagement` API endpoint for status and `resolution`. This option is always available, even if a webhook URL option was provided.
 
 The webhook URL should be:
 
@@ -117,20 +107,20 @@ Requests to the SparkAI service can be made with one simple REST call. For users
 
 ## Polling flow
 
-* (Optional) Upload an image file to the SparkAI image server by making a `POST` request to the `/v1/image` route, storing the signed URL for use in future API calls.
-* Make an API call to `POST` to the `engagement` path, supplying either the `program_name` parameter, or `instructions`, an array of URL `image_locations`. The API call will return a `token`.
-* Periodically poll the `engagement` resource using the returned `engagement` for status.
+1. (Optional) Upload an image file to the SparkAI image server by making a `POST` request to the `/v1/image` route, storing the location URL for use in future API calls.
+2. Make an API call to `POST` to the `engagement` path, supplying either a `program_name` or `instructions`, and a `content_location`. This API call will return a `token`.
+3. Periodically poll the `engagement` resource using the returned `engagement` for status.
 
 ## Webhook flow
-* (Optional) Upload an image file to the SparkAI image server by making a `POST` request to the `/v1/image` route, storing the signed URL for use in future API calls.
-* Make an API call to `POST` to the `engagement` path, supplying either the `program_name` parameter, or `instructions`, an array of URL `image_locations`. The API call will return a `token`.
-* When the `engagement` changes status, the SparkAI service will `POST` the `resolution` to a provided URL.
+1. (Optional) Upload an image file to the SparkAI image server by making a `POST` request to the `/v1/image` route, storing the location URL for use in future API calls.
+2. Make an API call to `POST` to the `engagement` path, supplying either a `program_name` or `instructions`, and a `content_location`. This API call will return a `token`.
+3. When the `engagement` changes status, the SparkAI service will `POST` the `resolution` to a provided URL.
 
-# Token-based authentication
+
 
 API calls are authenticated via a required API token which is included in the HTTP header as an `Authorization` field. See the header format below:
 
-Authorization: Bearer *provided_token*
+`Authorization: Bearer <provided_token>`
 
 Please reach out to <support@spark.ai> for assistance with the authorization token.
 
@@ -500,7 +490,7 @@ This API call can be used to poll for the status of any ongoing or completed Spa
     "instructions": "string",
     "webhook_url": "http://example.com",
     "program_name": "string",
-    "image_location": "http://example.com",
+    "content_location": "http://example.com",
     "state": "open",
     "response": "string",
     "annotations": [
@@ -538,7 +528,7 @@ Status Code **200**
 |» instructions|string|false|none|Instructions, if provided|
 |» webhook_url|string(uri)|false|none|The webhook URL, if provided|
 |» program_name|string(string)|false|none|The program name, if provided|
-|» image_location|string(uri)|false|none|none|
+|» content_location|string(uri)|false|none|none|
 |» state|string|false|none|none|
 |» response|string|false|none|none|
 |» annotations|[object]|false|none|New or modified annotations associated with the response|
@@ -646,7 +636,7 @@ This API call can be used to poll for the status of a SparkAI engagement by its 
     "instructions": "string",
     "webhook_url": "http://example.com",
     "program_name": "string",
-    "image_location": "http://example.com",
+    "content_location": "http://example.com",
     "state": "open",
     "response": "string",
     "annotations": [
@@ -684,7 +674,7 @@ Status Code **200**
 |» instructions|string|false|none|Instructions, if provided|
 |» webhook_url|string(uri)|false|none|The webhook URL, if provided|
 |» program_name|string(string)|false|none|The program name, if provided|
-|» image_location|string(uri)|false|none|none|
+|» content_location|string(uri)|false|none|none|
 |» state|string|false|none|none|
 |» response|string|false|none|none|
 |» annotations|[object]|false|none|New or modified annotations associated with the response|
